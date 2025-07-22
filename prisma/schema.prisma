@@ -1,0 +1,19 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Link {
+  id          String   @id @default(cuid())
+  originalUrl String   @map("original_url")
+  shortCode   String   @unique @map("short_code")
+  clicks      Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("links")
+}

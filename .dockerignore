@@ -1,0 +1,8 @@
+node_modules
+dist
+*.log
+*.ts
+*.tsx
+.idea
+.vscode
+.env
