@@ -7,6 +7,15 @@ datasource db {
   url      = "file:./dev.db"
 }
 
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  role      String    @default("user") // "admin" or "user"
+  links     Link[]    @relation("UserLinks")    // relation to links
+  createdAt DateTime  @default(now())
+}
+
 model Link {
   id          String   @id @default(cuid())
   originalUrl String   @map("original_url")
@@ -14,6 +23,9 @@ model Link {
   clicks      Int      @default(0)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
+
+  userId      String? @map("user_id")
+  user        User?   @relation("UserLinks", fields: [userId], references: [id])
 
   @@map("links")
 }
