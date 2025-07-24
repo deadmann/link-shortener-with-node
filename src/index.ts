@@ -13,12 +13,28 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { PrismaClient } from '@prisma/client';
+
+// Routes
+import initRouter from './routes/init.js';
 import { apiRouter, redirectRouter } from './routes/links.js';
+
+// Middlewares
 import { corsOptions, helmetOptions } from './config/middleware.js';
 
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
+
+async function isInitialized() {
+    const userCount = await prisma.user.count();
+    const settingCount = await prisma.setting.count();
+
+    if (userCount === 0 || settingCount === 0) {
+        console.log("🔧 Initialization required...");
+        return false;
+    }
+    return true;
+}
 
 // Security middleware
 app.use(helmet(helmetOptions));
@@ -30,6 +46,16 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Static files for simple frontend
 app.use(express.static('public'));
+
+// Initialize Page and redirect enforcement
+app.use('/init', initRouter);
+app.use(async (req, res, next) => {
+    const initialized = await isInitialized();
+    if (!initialized && req.path !== '/init' && !req.path.startsWith('/init')) {
+        return res.redirect('/init')
+    }
+    next()
+})
 
 // Mount API routes at /api
 app.use('/api', apiRouter);
@@ -52,6 +78,10 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
     console.error('Global error:', err);
     res.status(500).json({ error: 'Internal server error' });
 });
+
+if (!(await isInitialized())) {
+    console.log('🛠 First-time setup required. Visit /init to configure.');
+}
 
 // Start server
 app.listen(PORT, () => {
