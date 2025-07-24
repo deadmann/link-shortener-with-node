@@ -7,6 +7,15 @@ datasource db {
   url      = "file:./dev.db"
 }
 
+model Setting {
+  id        String    @id @default(cuid())
+  mode      String    @default("public") // "public" or "private"
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("setting")
+}
+
 model User {
   id        String    @id @default(cuid())
   email     String    @unique

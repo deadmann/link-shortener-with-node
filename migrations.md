@@ -10,13 +10,15 @@ db pull
 
 # Migrate
 
-Get latest live schema
+Get latest live schema --- ** **REMOVES** current Schema **
 ```bash
-npx prisma db pull
+# npx prisma db pull
 ```
 
 ```bash
-npx prisma migrate dev --name add-user-model
+npx prisma migrate dev --name <name>
+# e.g.: 
+# npx prisma migrate dev --name add-user-model
 ```
 & `Approve` changes
 for production and shared DB:
