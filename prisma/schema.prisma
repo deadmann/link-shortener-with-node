@@ -7,9 +7,19 @@ datasource db {
   url      = "file:./dev.db"
 }
 
+enum Role {
+  admin
+  user
+}
+
+enum Mode {
+  public
+  private
+}
+
 model Setting {
   id        String    @id @default(cuid())
-  mode      String    @default("public") // "public" or "private"
+  mode      Mode      @default(public) // "public" or "private"
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
 
@@ -20,9 +30,11 @@ model User {
   id        String    @id @default(cuid())
   email     String    @unique
   password  String
-  role      String    @default("user") // "admin" or "user"
+  role      Role      @default(user) // "admin" or "user"
   links     Link[]    @relation("UserLinks")    // relation to links
   createdAt DateTime  @default(now())
+
+  @@map("user")
 }
 
 model Link {
