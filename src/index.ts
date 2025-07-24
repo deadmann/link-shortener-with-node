@@ -10,31 +10,32 @@ import express from 'express';
 //     };
 // }
 
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 import cors from 'cors';
 import helmet from 'helmet';
 import { PrismaClient } from '@prisma/client';
+import cookieParser from 'cookie-parser';
+
+import expressLayouts from 'express-ejs-layouts';
 
 // Routes
 import initRouter from './routes/init.js';
 import { apiRouter, redirectRouter } from './routes/links.js';
+import authRoutes from "./routes/auth.routes.js";
 
 // Middlewares
 import { corsOptions, helmetOptions } from './config/middleware.js';
+import { requireAuth } from "./middleware/auth.middleware.js";
+import { isInitialized } from './utils/init-check.js';
 
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3000;
 
-async function isInitialized() {
-    const userCount = await prisma.user.count();
-    const settingCount = await prisma.setting.count();
-
-    if (userCount === 0 || settingCount === 0) {
-        console.log("🔧 Initialization required...");
-        return false;
-    }
-    return true;
-}
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Security middleware
 app.use(helmet(helmetOptions));
@@ -44,29 +45,60 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Static files for simple frontend
-app.use(express.static('public'));
+// Cookie & Session
+app.use(cookieParser());
+
+// EJS
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+// - EJS Layout
+app.use(expressLayouts);
+app.set('layout', 'layout');
+// - ExpressLayout Default Title
+app.use((req, res, next) => {
+    res.locals.title = 'Link Shortener'; // default title
+    next();
+});
 
 // Initialize Page and redirect enforcement
 app.use('/init', initRouter);
+// - Initialization check (runs for ALL other routes)
 app.use(async (req, res, next) => {
+    const skipInit = req.path.startsWith('/init') || req.path.startsWith('/public');
+    if (skipInit) return next();
     const initialized = await isInitialized();
-    if (!initialized && req.path !== '/init' && !req.path.startsWith('/init')) {
-        return res.redirect('/init')
-    }
-    next()
-})
+    if (!initialized) return res.redirect('/init');
+    next();
+});
+
+// Auth & Auth-check
+app.use('/auth', authRoutes)
+app.get('/auth/me', requireAuth, async (req, res) => {
+    res.json({ user: (req as any).user });
+});
+
+// Main Page -- Safe to render now
+app.get('/', async (req, res) => {
+    const initialized = await isInitialized();
+    if (!initialized) return res.redirect('/init');
+
+    const setting = await prisma.setting.findFirst();
+    if (!setting) return res.redirect('/init');
+    if (setting.mode === 'private') return res.redirect('/login'); // TODO: Make optional
+    res.render('home', { title: 'Welcome' });
+});
 
 // Mount API routes at /api
 app.use('/api', apiRouter);
+app.use('/', redirectRouter);
 
 // Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Mount redirect routes at root (this should come after other specific routes)
-app.use('/', redirectRouter);
+// Static files for simple frontend
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Handle 404
 app.use((req, res) => {
