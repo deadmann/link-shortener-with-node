@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport=" content="width=device-width, initial-scale=1.0" />
+    <title>Initialize App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/init.js" defer></script>
+</head>
+<body class="min-h-screen bg-gray-100 flex items-center justify-center">
+    <form id="initForm" class="bg-white shadow-lg p-6 rounded w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-4">App Initialization</h1>
+
+        <div id="errorMsg" class="text-red-500 mb-4 hidden"></div>
+
+        <label for="email" class="black mb-2">Email:
+            <input id="email" type="email" name="email" required class="mt-1 w-full border px-3 py-2 rounded" />
+        </label>
+
+        <label for="password" class="black mb-2">Password:
+            <input id="password" type="password" name="password" required class="mt-1 w-full border px-3 py-2 rounded" />
+        </label>
+
+        <label for="confirmPassword" class="black mb-2">Confirm Password:
+            <input id="confirmPassword" type="password" name="confirmPassword" required class="mt-1 w-full border px-3 py-2 rounded" />
+        </label>
+
+        <label for="mode" class="black mb-4">Mode:
+            <select id="mode" name="mode" class="mt-1 w-full border px-3 py-2 rounded">
+                <option value="public" selected>Public (anyone can create link)</option>
+                <option value="private">Private (only authenticated users)</option>
+            </select>
+        </label>
+
+        <button type="submit" class="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+            Initialize App
+        </button>
+    </form>
+</body>
+</html>

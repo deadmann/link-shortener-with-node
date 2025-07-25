@@ -1,0 +1,51 @@
+<div class="max-w-2xl mx-auto mt-10 px-4">
+    <h1 class="text-2xl font-bold mb-4">
+        User Management
+    </h1>
+
+    <% if (error) { %>
+        <div class="bg-red-100 text-red-800 p-2 rounded mb-4">
+            <%= error %>
+        </div>
+    <% } %>
+
+    <% if (currentUser.role === 'owner') { %>
+    <a href="/users/create" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+        Add New User
+    </a>
+    <% } %>
+
+    <table class="min-w-full bg-white mt-4 shadow-md rounded">
+        <thead>
+            <tr>
+                <td class="py-2 px-4 border-b">Email</td>
+                <td class="py-2 px-4 border-b">Role</td>
+                <td class="py-2 px-4 border-b">Created</td>
+                <td class="py-2 px-4 border-b">Actions</td>
+            </tr>
+        </thead>
+        <tbody>
+            <% users.forEach(user => { %>
+                <tr>
+                    <td class="py-2 px-4 border-b"><%= user.email %></td>
+                    <td class="py-2 px-4 border-b"><%= user.role %></td>
+                    <td class="py-2 px-4 border-b"><%= new Date(user.createdAt).toLocaleDateString() %></td>
+                    <td class="py-2 px-4 border-b space-x-2">
+                        <% if (['admin','owner'].includes(currentUser.role)) { %>
+                            <a href="/users/<%= user.id %>/edit" class="text-blue-600 hover:underline">
+                                Edit
+                            </a>
+                        <% } %>
+                        <% if (user.role !== 'owner' && currentUser.role === 'owner') { %>
+                            <form method="POST" action="/users/<%= user.id %>/delete" class="inline">
+                                <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Delete this user?')">
+                                    Delete
+                                </button>
+                            </form>
+                        <% } %>
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
