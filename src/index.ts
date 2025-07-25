@@ -60,6 +60,43 @@ app.use((req, res, next) => {
     next();
 });
 
+/** Our Top Level Routes -- Prevent from getting caught in the redirect route */
+const RESERVED = new Set([
+    'init',
+    'api',
+    'auth',
+    'login',
+    'logout',
+    'assets',
+    'public'
+])
+// 📌 GLOBAL GUARD: static + reserved + short‑code dispatch
+app.use((req, res, next) => {
+    // 1) remove leading slash, split off query
+    const fullPath = req.path.replace(/^\/+/, '').split('?')[0]
+    if (!fullPath) {
+        // “/” → let it fall through (e.g. home page or init redirect)
+        return next()
+    }
+
+    const [first] = fullPath.split('/')
+
+    // 2) skip static-like requests: first segment contains a dot
+    if (first.includes('.')) {
+        return next()
+    }
+
+    // 3) skip reserved app routes
+    if (RESERVED.has(first)) {
+        return next()
+    }
+
+    // 4) otherwise, treat it as a short code
+    //    (you might want to also regex-validate length/charset here)
+    req.params.shortCode = first
+    return redirectRouter(req, res, next)
+})
+
 // Initialize Page and redirect enforcement
 app.use('/init', initRouter);
 // - Initialization check (runs for ALL other routes)
@@ -90,7 +127,7 @@ app.get('/', async (req, res) => {
 
 // Mount API routes at /api
 app.use('/api', apiRouter);
-app.use('/', redirectRouter);
+// app.use('/', redirectRouter); // On the top, we did it through the guard middleware, with reserved route check.
 
 // Health check
 app.get('/health', (req, res) => {

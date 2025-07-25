@@ -47,8 +47,7 @@ router.post('/', async (req, res) => {
             }
         })
 
-        // return res.status(200).json({ success: true });
-        return res.redirect('/')
+        return res.status(200).json({ success: true });
     } catch (err) {
         console.error('Init Error:', err);
         return res.status(500).json({ error: 'Initialization failed' });

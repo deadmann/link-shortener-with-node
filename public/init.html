@@ -5,10 +5,13 @@
     <meta name="viewport=" content="width=device-width, initial-scale=1.0" />
     <title>Initialize App</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/init.js" defer></script>
 </head>
 <body class="min-h-screen bg-gray-100 flex items-center justify-center">
-    <form method="POST" action="/init" class="bg-white shadow-lg p-6 rounded w-full max-w-md">
+    <form id="initForm" class="bg-white shadow-lg p-6 rounded w-full max-w-md">
         <h1 class="text-2xl font-bold mb-4">App Initialization</h1>
+
+        <div id="errorMsg" class="text-red-500 mb-4 hidden"></div>
 
         <label for="email" class="black mb-2">Email:
             <input id="email" type="email" name="email" required class="mt-1 w-full border px-3 py-2 rounded" />
