@@ -37,7 +37,7 @@ router.post('/', async (req, res) => {
             data: {
                 email,
                 password: hashedPassword,
-                role: Role.admin
+                role: Role.owner
             }
         })
 

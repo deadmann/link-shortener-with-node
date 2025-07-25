@@ -19,9 +19,17 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 }
 
 export function requireAdmin(req: Request, res: Response, next: NextFunction) {
-    const user = (req as any).user
-    if (!user || user.role != 'admin'){
+    const user = (req as any).user;
+    if (!user || (user.role !== 'admin' && user.role !== 'owner')) {
         return res.status(403).json({ error: 'Admin access only' })
     }
     next()
+}
+
+export function requireOwner(req, res, next) {
+    const user = (req as any).user;
+    if (!user || user.role !== 'owner') {
+        return res.status(403).send('Owner access required');
+    }
+    next();
 }

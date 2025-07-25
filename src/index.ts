@@ -22,6 +22,7 @@ import expressLayouts from 'express-ejs-layouts';
 
 // Routes
 import initRouter from './routes/init.js';
+import userRouter from './routes/users.js';
 import { apiRouter, redirectRouter } from './routes/links.js';
 import authRoutes from "./routes/auth.routes.js";
 
@@ -67,6 +68,7 @@ const RESERVED = new Set([
     'auth',
     'login',
     'logout',
+    'users',
     'assets',
     'public'
 ])
@@ -113,6 +115,9 @@ app.use('/auth', authRoutes)
 app.get('/auth/me', requireAuth, async (req, res) => {
     res.json({ user: (req as any).user });
 });
+
+// User management
+app.use('/users', userRouter)
 
 // Main Page -- Safe to render now
 app.get('/', async (req, res) => {
