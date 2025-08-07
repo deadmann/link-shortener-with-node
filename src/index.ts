@@ -11,11 +11,11 @@ import express from 'express';
 // }
 
 import path from 'path';
-import { fileURLToPath } from 'url';
+import {fileURLToPath} from 'url';
 
 import cors from 'cors';
 import helmet from 'helmet';
-import { PrismaClient } from '@prisma/client';
+import {PrismaClient} from '@prisma/client';
 import cookieParser from 'cookie-parser';
 
 import expressLayouts from 'express-ejs-layouts';
@@ -23,13 +23,13 @@ import expressLayouts from 'express-ejs-layouts';
 // Routes
 import initRouter from './routes/init.js';
 import userRouter from './routes/users.js';
-import { apiRouter, redirectRouter } from './routes/links.js';
+import {apiRouter, redirectRouter} from './routes/links.js';
 import authRoutes from "./routes/auth.routes.js";
 
 // Middlewares
-import { corsOptions, helmetOptions } from './config/middleware.js';
-import { requireAuth } from "./middleware/auth.middleware.js";
-import { isInitialized } from './utils/init-check.js';
+import {corsOptions, helmetOptions} from './config/middleware.js';
+import {attachCurrentUser, requireAuth} from "./middleware/auth.middleware.js";
+import {isInitialized} from './utils/init-check.js';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -43,11 +43,14 @@ app.use(helmet(helmetOptions));
 app.use(cors(corsOptions));
 
 // Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({limit: '10mb'}));
+app.use(express.urlencoded({extended: true, limit: '10mb'}));
 
 // Cookie & Session
 app.use(cookieParser());
+
+// User Provider
+app.use(attachCurrentUser)
 
 // EJS
 app.set('view engine', 'ejs');
@@ -113,7 +116,7 @@ app.use(async (req, res, next) => {
 // Auth & Auth-check
 app.use('/auth', authRoutes)
 app.get('/auth/me', requireAuth, async (req, res) => {
-    res.json({ user: (req as any).user });
+    res.json({user: (req as any).user});
 });
 
 // User management
@@ -127,7 +130,7 @@ app.get('/', async (req, res) => {
     const setting = await prisma.setting.findFirst();
     if (!setting) return res.redirect('/init');
     if (setting.mode === 'private') return res.redirect('/login'); // TODO: Make optional
-    res.render('home', { title: 'Welcome' });
+    res.render('home', {title: 'Welcome'});
 });
 
 // Mount API routes at /api
@@ -136,7 +139,7 @@ app.use('/api', apiRouter);
 
 // Health check
 app.get('/health', (req, res) => {
-    res.json({ status: 'OK', timestamp: new Date().toISOString() });
+    res.json({status: 'OK', timestamp: new Date().toISOString()});
 });
 
 // Static files for simple frontend
@@ -144,13 +147,13 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // Handle 404
 app.use((req, res) => {
-    res.status(404).json({ error: 'Route not found' });
+    res.status(404).json({error: 'Route not found'});
 });
 
 // Global error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error('Global error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({error: 'Internal server error'});
 });
 
 if (!(await isInitialized())) {

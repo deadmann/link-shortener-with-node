@@ -24,24 +24,24 @@ form.addEventListener('submit', async (e) => {
         const responseData = await response.json();
 
         if (response.ok) {
-            result.className = 'result';
+            result.className = 'result bg-green-100 text-green-800';
             result.innerHTML = `
                 <strong>Short URL created successfully!</strong><br>
-                <div class="short-url">${responseData.shortUrl}</div>
+                <div class="short-url font-mono text-blue-600">${responseData.shortUrl}</div>
                 <div style="margin-top: 10px;">
-                    <a href="${responseData.shortUrl}" target="_blank">Test Link</a>
+                    <a href="${responseData.shortUrl}" target="_blank" class="text-blue-500 underline">Test Link</a>
                 </div>
             `;
             form.reset();
             loadLinks(); // Refresh the links list
         } else {
-            result.className = 'result error';
+            result.className = 'result error bg-red-100 text-red-800';
             result.innerHTML = `<strong>Error:</strong> ${responseData.error}`;
         }
 
         result.style.display = 'block';
     } catch (error) {
-        result.className = 'result error';
+        result.className = 'result error bg-red-100 text-red-800';
         result.innerHTML = `<strong>Error:</strong> Failed to create short link`;
         result.style.display = 'block';
     }
@@ -59,20 +59,22 @@ async function loadLinks() {
         }
 
         linksList.innerHTML = links.map(link => `
-            <div class="link-item">
-                <div class="short-url">
+            <div class="link-item bg-white shadow rounded p-4 border border-gray-200">
+                <div class="short-url text-lg text-blue-700 font-mono">
                     <a href="/${link.shortCode}" target="_blank">
                         ${window.location.origin}/${link.shortCode}
                     </a>
                 </div>
-                <div class="link-original">→ ${link.originalUrl}</div>
-                <div class="link-stats">
+                <div class="link-original text-gray-700 truncate">
+                    → ${link.originalUrl}
+                </div>
+                <div class="link-stats text-sm text-gray-500 mt-1">
                     Clicks: ${link.clicks} | Created: ${new Date(link.createdAt).toLocaleDateString()}
                 </div>
             </div>
         `).join('');
     } catch (error) {
-        linksList.innerHTML = '<p>Error loading links.</p>';
+        linksList.innerHTML = '<p class="text-red-600">Error loading links.</p>';
     }
 }
 

@@ -7,6 +7,46 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-    <%- body %>
+    <!-- HEADER -->
+    <header class="bg-white shadow-md flex justify-between items-center">
+        <a href="/" class="text-xl font-semibold text-blue-600">
+            Shortify
+        </a>
+        <% if (currentUser) { %>
+            <div class="relative group">
+                <button class="flex items-center space-x-2 focus:outline-none">
+                    <span class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                        <%= currentUser?.email.charAt(0).toUpperCase() %>
+                    </span>
+                    <span class="hidden sm:inline">
+                        <%= currentUser?.email %>
+                    </span>
+                </button>
+                <div class="absolute right-0 bg-white border rounded shadow-md hidden group-hover:block">
+                    <a href="/users" class="block px-4 py-2 hover:bg-gray-100">
+                        Manage Users
+                    </a>
+                    <form method="post" action="/auth/logout">
+                        <button type="submit" class="block w-full text-left px-4 py-2 hover:bg-gray-100">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        <% } else { %>
+            <a href="/auth/login" class="text-blue-600 hover:underline">
+                Login
+            </a>
+        <% } %>
+    </header>
+
+    <main class="m-h-screen">
+        <%- body %>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white shadow-inner text-center text-sm p-4 mt-10">
+        © <%= new Date().getFullYear() %> Shortify. All rights reserved.
+    </footer>
 </body>
 </html>

@@ -3,12 +3,10 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import {PrismaClient, Mode, Role} from '@prisma/client'
 import {hashPassword} from "../utils/hash";
+import {COOKIE_NAME, JWT_SECRET} from "../config/constants";
 
 const prisma = new PrismaClient()
 const router = express.Router()
-
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret'
-const COOKIE_NAME = 'token'
 
 // Helper to check if public registration is enabled
 async function isPublicMode() {

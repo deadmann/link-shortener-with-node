@@ -1,7 +1,34 @@
 import {Request, Response, NextFunction} from 'express'
 import jwt from 'jsonwebtoken'
+import {PrismaClient} from "@prisma/client";
+import { COOKIE_NAME, JWT_SECRET } from '../config/constants.js'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret'
+const prisma = new PrismaClient();
+
+export async function attachCurrentUser(req: Request, res: Response, next: NextFunction) {
+    (req as any).user = null;
+    res.locals.currentUser = null;
+
+    const token = req.cookies[COOKIE_NAME];
+    if (!token) {
+        return next()
+    }
+
+    if (token) {
+        try {
+            const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+            const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+            if (user) {
+                (req as any).user = user
+                res.locals.currentUser = user
+            }
+        } catch (err) {
+            console.warn('Invalid token:', (err as Error).message);
+        }
+    }
+
+    next()
+}
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
     const token = req.cookies?.token
@@ -26,7 +53,7 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction) {
     next()
 }
 
-export function requireOwner(req, res, next) {
+export function requireOwner(req: Request, res: Response, next: NextFunction) {
     const user = (req as any).user;
     if (!user || user.role !== 'owner') {
         return res.status(403).send('Owner access required');

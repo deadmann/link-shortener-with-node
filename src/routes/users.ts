@@ -14,8 +14,8 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
     const users = await prisma.user.findMany({
         select: { id: true, email: true, role: true, createdAt: true}
     })
-    const currentUser = (req as any).user;
-    res.render('users', { users, currentUser,  error: null })
+    // const currentUser = (req as any).user;
+    res.render('users', { users,  error: null })
 })
 
 /**
@@ -23,8 +23,8 @@ router.get('/', requireAuth, requireAdmin, async (req, res) => {
  * Only Owner can create new Admin or User
  */
 router.get('/create', requireAuth, requireOwner, (req, res) => {
-    const currentUser = (req as any).user;
-    res.render('user-form', { user: null, mode: 'create', currentUser, error: null });
+    // const currentUser = (req as any).user;
+    res.render('user-form', { user: null, mode: 'create', error: null });
 });
 
 /**
@@ -32,7 +32,7 @@ router.get('/create', requireAuth, requireOwner, (req, res) => {
  */
 router.post('/create', requireAuth, requireOwner, async (req, res) => {
     const {email, password, role} = req.body
-    const currentUser = (req as any).user;
+    // const currentUser = (req as any).user;
     try{
         if(!email || !password) throw new Error('Email and Password required')
 
@@ -42,7 +42,7 @@ router.post('/create', requireAuth, requireOwner, async (req, res) => {
 
         res.redirect('/users')
     } catch (err: any) {
-        res.render('user-form', { user: req.body, mode: 'create', currentUser, error: err.message })
+        res.render('user-form', { user: req.body, mode: 'create', error: err.message })
     }
 })
 
@@ -54,8 +54,8 @@ router.get('/:id/edit', requireAuth, requireAdmin, async (req, res) => {
     const { id } = req.params;
     const user = await prisma.user.findUnique({ where: { id } })
     if(!user) return res.redirect('/users')
-    const currentUser = (req as any).user;
-    res.render('user-form', { user, mode: 'edit', currentUser, error: null })
+    // const currentUser = (req as any).user;
+    res.render('user-form', { user, mode: 'edit', error: null })
 })
 
 /**
@@ -80,7 +80,7 @@ router.post('/:id/edit', requireAuth, requireAdmin, async (req, res) => {
         await prisma.user.update({ where: { id }, data });
         return res.redirect('/users');
     } catch (err: any) {
-        return res.render('user-form', { user: { id, email, role }, mode: 'edit', currentUser, error: err.message });
+        return res.render('user-form', { user: { id, email, role }, mode: 'edit', error: err.message });
     }
 })
 
